@@ -1,6 +1,7 @@
 package twitterapp1;
 
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -112,7 +113,7 @@ public class DataStreamAndStore {
         
         DBCursor cursor = collection.find();               
                while(cursor.hasNext()) {
-                    System.out.println(((BasicDBObject) cursor.next().get("entities")).get("hashtags"));
+                    System.out.println(((BasicDBList) cursor.next().get("entities")).get("hashtags"));
                     //cursor.next().get(string);
                }
     }
