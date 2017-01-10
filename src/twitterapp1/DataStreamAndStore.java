@@ -7,6 +7,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
+import java.util.StringTokenizer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -107,15 +108,93 @@ public class DataStreamAndStore {
         
     }
     
-    public void analyzeData(DBCollection collection) {
-        BasicDBObject query = new BasicDBObject();
-        //query.append("text:", 1);
+    public void tokenizeAndStoreData(DBCollection collection, DBCollection tokenizedCollection) {
+        DBObject tokens = new BasicDBObject("_id","tokens");
+                                  /*.append("hashtags", "n" )
+                                    .append("mentios", null)
+                                    .append("URLs", null)
+                                    .append("retweets", null)
+                                    .append("connections", new BasicDBObject("user",null)
+                                                                     .append("timestamp",null)
+                                                                     .append("hashtags", null)
+                                                                     .append("mentios", null)
+                                                                     .append("URLs", null)
+                                                                     .append("retweets", null));*/
+        
+        tokenizedCollection.insert(tokens);
+        //tokenizedCollection.c
+        
+        
+        
         
         DBCursor cursor = collection.find();               
-               while(cursor.hasNext()) {
-                    System.out.println(((BasicDBList) cursor.next().get("entities")).get("hashtags"));
-                    //cursor.next().get(string);
+               while(cursor.hasNext()) {                    
+                    DBObject c = cursor.next();
+                    String text = c.get("text").toString();
+                    //System.out.println(text);
+                    String userScreenName = ((BasicDBObject) c.get("user")).get("screen_name").toString();
+                    String timestamp = c.get("timestamp_ms").toString();
+                    //System.out.println("-->"+userScreenName);
+                    
+                    DBObject modifiedObject =new BasicDBObject();
+                    DBObject searchObject =new BasicDBObject("_id", "tokens");
+                    searchObject.put("_id", "tokens");
+                    
+                    
+                    StringTokenizer st = new StringTokenizer(text);
+                    while (st.hasMoreTokens()) {
+                        String temp = st.nextToken();
+                        if(temp.startsWith("#")) {
+                            //System.out.println(temp); 
+                            modifiedObject.put("$push", new BasicDBObject().append("hashtags", temp));
+                            tokenizedCollection.update(searchObject, modifiedObject);
+                            
+                            modifiedObject.put("$push", new BasicDBObject().append("connections", 
+                                                                    new BasicDBObject("user",userScreenName)
+                                                                        .append("timestamp",timestamp)
+                                                                        .append("hashtags", temp)));
+                            tokenizedCollection.update(searchObject, modifiedObject);
+                        } 
+                        else if(temp.startsWith("@")) {
+                            //System.out.println(temp);
+                            modifiedObject.put("$push", new BasicDBObject().append("mentions", temp));
+                            tokenizedCollection.update(searchObject, modifiedObject);
+                            
+                            modifiedObject.put("$push", new BasicDBObject().append("connections", 
+                                                                    new BasicDBObject("user",userScreenName)
+                                                                        .append("timestamp",timestamp)
+                                                                        .append("mentions", temp)));
+                            tokenizedCollection.update(searchObject, modifiedObject);
+                        }
+                        else if(temp.startsWith("https://")) {
+                            //System.out.println(temp);
+                            modifiedObject.put("$push", new BasicDBObject().append("URLs", temp));
+                            tokenizedCollection.update(searchObject, modifiedObject);
+                            
+                            modifiedObject.put("$push", new BasicDBObject().append("connections", 
+                                                                    new BasicDBObject("user",userScreenName)
+                                                                        .append("timestamp",timestamp)
+                                                                        .append("URLs", temp)));
+                            tokenizedCollection.update(searchObject, modifiedObject);
+                        }
+                        
+                        //tokenizedCollection.update(tokens, push);
+                    }
+                    if(c.get("retweeted_status") != null) {
+                        String rtId = ((BasicDBObject) c.get("retweeted_status")).get("id_str").toString();
+                        //System.out.println(rtId);
+                        modifiedObject.put("$push", new BasicDBObject().append("retweets", rtId));
+                        tokenizedCollection.update(searchObject, modifiedObject);
+                            
+                        modifiedObject.put("$push", new BasicDBObject().append("connections", 
+                                                                new BasicDBObject("user",userScreenName)
+                                                                        .append("timestamp",timestamp)
+                                                                        .append("retweets", rtId)));
+                        tokenizedCollection.update(searchObject, modifiedObject);
+                    }
+                    
                }
+               
     }
     
 }

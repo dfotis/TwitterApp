@@ -31,14 +31,20 @@ public class TwitterApp1 {
         DB database = mongo.getDB("tweetsDataBase");// connection with database
         System.out.println("Connect to database successfully");            
         
-        final DBCollection collection = database.getCollection("tweetsGrigoropoulos");//creating a collection
-        //collection.remove(new BasicDBObject());
-            
+        final DBCollection collection = database.getCollection("tweetsGrigoropoulos");//creating a collection to store streaming data (json format)
         
+        
+        DB database2 = mongo.getDB("tokensDatabase");// connection with database
+        //drop and recreate collection
+        final DBCollection temp = database2.getCollection("tokenizedData");
+        temp.drop();
+        final DBCollection tokenizedCollection = database2.getCollection("tokenizedData");
+        
+               
         DataStreamAndStore sas = new DataStreamAndStore();
-        //sas.streamAndStore("#grigoropoulos", collection);   
+        sas.streamAndStore("#grigoropoulos", collection);   
         
-        sas.analyzeData(collection);
+        sas.tokenizeAndStoreData(collection, tokenizedCollection);
     }
 
     
