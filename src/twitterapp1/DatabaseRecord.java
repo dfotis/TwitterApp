@@ -3,13 +3,8 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import java.net.URL;
 import java.sql.*;
-import java.util.Date;
 import java.util.ArrayList;
-import java.util.StringJoiner;
-import java.util.TimeZone;
-
 /**
  * Created by manos on 9/1/2017.
  */
@@ -23,7 +18,9 @@ public class DatabaseRecord {
     ArrayList<String> mention_name_list;
     ArrayList<String> mention_id_list;
     ArrayList<String> hashtags_list;
+    String tweet_id;
     String text;
+    String retweet_id;
 
     DatabaseRecord(){
         url_list = new ArrayList<>();
@@ -54,12 +51,14 @@ public class DatabaseRecord {
         mention_name_list.add(name);
     }
 
-    void setText(String text){
+    void setText(String text, String tweet_id){
         this.text = text;
+        this.tweet_id = tweet_id;
     }
 
-    void setRetwitte(){
+    void setRetwitte(String retweet_id){
         retwitte = true;
+        this.retweet_id = retweet_id;
     }
 
     void addHashtag(String hashtag){
@@ -73,11 +72,12 @@ public class DatabaseRecord {
     }
 
     void insertTweet(String table, Connection con) throws SQLException {
-        String query = "INSERT INTO " + table + "( user_id, timestamp ,text) VALUES(?,?,?)";
+        String query = "INSERT INTO " + table + "( user_id, timestamp ,text, tweet_id) VALUES(?,?,?,?)";
         PreparedStatement preparedStat = con.prepareStatement(query);
         preparedStat.setString(1,user_id);
         preparedStat.setTimestamp(2, Timestamp.valueOf(timestampConverter()));
         preparedStat.setString(3,text);
+        preparedStat.setString(4,tweet_id);
         preparedStat.execute();
     }
 
@@ -117,14 +117,13 @@ public class DatabaseRecord {
     }
 
     void insertRetweet(String table, Connection con) throws SQLException {
-        String query = "INSERT INTO " + table + "(user_id, timestamp ,tweet_user ) VALUES(?,?,?)";
+        String query = "INSERT INTO " + table + "(user_id, timestamp ,tweet_user, retweet_id ) VALUES(?,?,?,?)";
         if(retwitte){
             PreparedStatement preparedStat = con.prepareStatement(query);
             preparedStat.setString(1,user_id);
             preparedStat.setTimestamp(2, Timestamp.valueOf(timestampConverter()));
             preparedStat.setString(3,mention_id_list.get(0));
-            preparedStat.execute();
-
+            preparedStat.setString(4,retweet_id);
         }
     }
 

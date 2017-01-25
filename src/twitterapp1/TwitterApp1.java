@@ -3,49 +3,48 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package twitterapp1;
-
 
 import com.mongodb.BasicDBObject;
-import java.util.List;
 import twitter4j.*;
 
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
-import com.mongodb.DBCursor;
 import com.mongodb.Mongo;
 
 import java.io.IOException;
 
 
 public class TwitterApp1 {
-    
+
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) throws TwitterException, IOException {
-        //initialization of mongodb database                
-        Mongo mongo = new Mongo("localhost"); // connection with Mongodb server           
-        
+    public static void main(String[] args) throws TwitterException, IOException, JSONException {
+        //initialization of mongodb database
+        System.out.println("EEEEEEEEEEEEEEEEEEEEEEE");
+        Mongo mongo = new Mongo("localhost"); // connection with Mongodb server
+
         DB database = mongo.getDB("tweetsDataBase");// connection with database
-        System.out.println("Connect to database successfully");            
-        
-        final DBCollection collection = database.getCollection("tweetsGrigoropoulos");//creating a collection to store streaming data (json format)
-        
-        
-        DB database2 = mongo.getDB("tokensDatabase");// connection with database
-        //drop and recreate collection
-        final DBCollection temp = database2.getCollection("tokenizedData");
-        temp.drop();
-        final DBCollection tokenizedCollection = database2.getCollection("tokenizedData");
-        
-               
+        if(database != null){
+            System.out.println("Connect to database successfully ");
+            System.out.println("Connect to database successfully ");
+
+        }
+
+
+        final DBCollection collection = database.getCollection("new_collection");//creating a collection
+
         DataStreamAndStore sas = new DataStreamAndStore();
-        sas.streamAndStore("#grigoropoulos", collection);   
-        
-        sas.tokenizeAndStoreData(collection, tokenizedCollection);
+        //sas.streamAndStore("trump", collection);
+
+        sas.analyzeData(collection);
+
+        //DatabaseConnection connection = new DatabaseConnection();
+        //connection.getAllUsers();
+
+
+
     }
 
-    
+
 }

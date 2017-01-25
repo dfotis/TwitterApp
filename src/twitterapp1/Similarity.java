@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package twitterapp1;
+//package twitterapp1;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +23,8 @@ public class Similarity {
     }
     
     
-    public double cosineSimilarity(String s1, String s2) {
+    public static  double cosineSimilarity(String s1, String s2) {
+         if(s1==null || s2==null || s1.equals("") || s2.equals("")) return 0;
          double similarity=0;
          String temp = s1+" "+s2; //merge two strings
          
@@ -35,7 +36,7 @@ public class Similarity {
                   
          //if the size allTokens is equal to the size of (tokensFirstTemp + tokensSecondTemp) means that there are no 
          //common tokens words between s1 and s2. So cosine_similarity = 0.         
-         if(allTokensSet.size() == (tokensFirstTemp.length + tokensSecondTemp.length))
+         if(allTokensSet.size() == (tokensFirstTemp.length + tokensSecondTemp.length) )
          {
              return 0;
          }
@@ -81,9 +82,10 @@ public class Similarity {
              norm2 += vctr2[i]*vctr2[i];
          }
          
-         similarity = dotProduct / Math.sqrt(norm1*norm2);
+         similarity = dotProduct / (Math.sqrt(norm1*norm2)+0) ;
          
          return similarity;
      }
+
     
 }
