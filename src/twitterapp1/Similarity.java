@@ -1,3 +1,5 @@
+package twitterapp1;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -24,7 +26,7 @@ public class Similarity {
     
     
     public static  double cosineSimilarity(String s1, String s2) {
-         if(s1==null || s2==null || s1.equals("") || s2.equals("")) return 0;
+         if(s1==null || s2==null || s1.trim().equals("") || s2.trim().equals("")) return 0;
          double similarity=0;
          String temp = s1+" "+s2; //merge two strings
          

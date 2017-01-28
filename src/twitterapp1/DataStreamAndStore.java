@@ -1,3 +1,4 @@
+package twitterapp1;
 
 import com.mongodb.*;
 import com.mongodb.util.JSON;
@@ -118,7 +119,7 @@ public class DataStreamAndStore {
                     e.printStackTrace();
                 }
             }
-        }, 5, TimeUnit.MINUTES);
+        }, 3, TimeUnit.MINUTES);
 
     }
 
