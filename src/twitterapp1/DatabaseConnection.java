@@ -68,23 +68,30 @@ public class DatabaseConnection {
 
                 String current_hashtags = getCurrentsUserHashtags(users_ids.get(i),connection);
                 String current_mentions = getCurrentsUserMentions(users_ids.get(i),connection);
-
-
+                String current_urls = getCurrentsUserUrls(users_ids.get(i),connection);
+                String current_tweet = getCurrentsUserTweet(users_ids.get(i),connection);
+                String current_retweet = getCurrentsUserRetweet(users_ids.get(i),connection);
 
                 //System.out.println("Hashtags from user_1: " + current_hashtags);
                 hashtags_similarity[i][i] = 1;
+                retweet_similarity[i][i] = 1;
+                urls_similarity[i][i] = 1;
+                mentions_similarity[i][i] = 1;
+                tweet_similarity[i][i] = 1;
                 for (int j = i+1; j < users_ids.size(); j++) {
-                    String current_hashtags_2 = "";
-                    String sql_3 = ("SELECT hashtag FROM hashtags WHERE user_id = '" + users_ids.get(j) + "' ORDER BY hashtag ASC;");
-                    ResultSet rs_3 = st.executeQuery(sql_3);
-                    while (rs_3.next()) {
-                        String temp_current_hashtags_2 = rs_3.getString("hashtag");
-                        if(temp_current_hashtags_2 != null){
-                            current_hashtags_2 = current_hashtags_2 + " " +temp_current_hashtags_2;
-                        }
-                    }
-                    System.out.println("Hashtags from user_2: " + current_hashtags_2);
+
+                    String current_hashtags_2 = getCurrentsUserHashtags(users_ids.get(j),connection);
+                    String current_mentions_2 = getCurrentsUserMentions(users_ids.get(j),connection);
+                    String current_urls_2 = getCurrentsUserUrls(users_ids.get(j),connection);
+                    String current_tweet_2 = getCurrentsUserTweet(users_ids.get(j),connection);
+                    String current_retweet_2 = getCurrentsUserRetweet(users_ids.get(j),connection);
+
                     hashtags_similarity[i][j] = hashtags_similarity[j][i] = Similarity.cosineSimilarity(current_hashtags, current_hashtags_2);
+                    retweet_similarity[i][j] = retweet_similarity[j][i] = Similarity.cosineSimilarity(current_retweet, current_retweet_2);
+                    urls_similarity[i][j] = urls_similarity[j][i] = Similarity.cosineSimilarity(current_urls, current_urls_2);
+                    mentions_similarity[i][j] = mentions_similarity[j][i] = Similarity.cosineSimilarity(current_mentions, current_mentions_2);
+                    tweet_similarity[i][j] = tweet_similarity[j][i] = Similarity.cosineSimilarity(current_tweet, current_tweet_2);
+
 
                 }
                 System.out.println("|");
@@ -129,7 +136,7 @@ public class DatabaseConnection {
         //System.out.println(sql_2);
         ResultSet rs_select_mentions = st.executeQuery(sql_select_mentions);
         while (rs_select_mentions.next()) {
-            String temp_current_mention =  rs_select_mentions.getString("mentioned_id");
+            String temp_current_mention =  rs_select_mentions.getString("mentioned_user");
             if(temp_current_mention != null){
                 current_mentions = current_mentions + " " + temp_current_mention;
             }
@@ -155,13 +162,74 @@ public class DatabaseConnection {
         return current_urls;
     }
 
+    String getCurrentsUserRetweet(String user_id, Connection connection) throws SQLException {
+        //===== Get Mentions from current user =====
+        Statement st = connection.createStatement();
+        String current_retweet = "";
+        String sql_select_retweet = ("SELECT retweet_id FROM retweet WHERE user_id = '" + user_id+ "';");
+        //System.out.println(sql_2);
+        ResultSet rs_select_retweet = st.executeQuery(sql_select_retweet);
+        while (rs_select_retweet.next()) {
+            String temp_current_retweet =  rs_select_retweet.getString("retweet_id");
+            if(temp_current_retweet!= null){
+                current_retweet = current_retweet + " " + temp_current_retweet;
+            }
+        }
+        return current_retweet;
+    }
+
+    String getCurrentsUserTweet(String user_id, Connection connection) throws SQLException {
+        //===== Get Tweet from current user =====
+        Statement st = connection.createStatement();
+        String current_tweet = "";
+        String sql_select_tweet = ("SELECT text FROM tweet WHERE user_id = '" + user_id+ "';");
+        //System.out.println(sql_2);
+        ResultSet rs_select_tweet = st.executeQuery(sql_select_tweet);
+        while (rs_select_tweet.next()) {
+            String temp_current_tweet =  rs_select_tweet.getString("text");
+            if(temp_current_tweet!= null){
+                current_tweet = current_tweet + " " + temp_current_tweet;
+            }
+        }
+        return current_tweet;
+    }
+
     void printArray(){
-                for(int i= 0; i < hashtags_similarity.length; i++) {
-                    for (int j = 0; j < hashtags_similarity[i].length; j++) {
-                        System.out.printf("%.2f ", hashtags_similarity[i][j]);
-                    }
-                    System.out.println("|");
-                }
+        for(int i= 0; i < hashtags_similarity.length; i++) {
+            for (int j = 0; j < hashtags_similarity[i].length; j++) {
+                System.out.printf("%.2f ", hashtags_similarity[i][j]);
+            }
+            System.out.println("|");
+        }
+        System.out.println("===============================");
+        for(int i= 0; i < tweet_similarity.length; i++) {
+            for (int j = 0; j < tweet_similarity[i].length; j++) {
+                System.out.printf("%.2f ", tweet_similarity[i][j]);
+            }
+            System.out.println("|");
+        }
+        System.out.println("===============================");
+        for(int i= 0; i < retweet_similarity.length; i++) {
+            for (int j = 0; j < retweet_similarity[i].length; j++) {
+                System.out.printf("%.2f ", retweet_similarity[i][j]);
+            }
+            System.out.println("|");
+        }
+        System.out.println("===============================");
+        for(int i= 0; i < mentions_similarity.length; i++) {
+            for (int j = 0; j < mentions_similarity[i].length; j++) {
+                System.out.printf("%.2f ", mentions_similarity[i][j]);
+            }
+            System.out.println("|");
+        }
+        System.out.println("===============================");
+        for(int i= 0; i < urls_similarity.length; i++) {
+            for (int j = 0; j < urls_similarity[i].length; j++) {
+                System.out.printf("%.2f ", urls_similarity[i][j]);
+            }
+            System.out.println("|");
+        }
+
     }
 
 

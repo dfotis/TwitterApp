@@ -24,7 +24,7 @@ public class TwitterApp1 {
         System.out.println("EEEEEEEEEEEEEEEEEEEEEEE");
         Mongo mongo = new Mongo("localhost"); // connection with Mongodb server
 
-        DB database = mongo.getDB("tweetsDataBase");// connection with database
+        DB database = mongo.getDB("tweets_database");// connection with database
         if(database != null){
             System.out.println("Connect to database successfully ");
             System.out.println("Connect to database successfully ");
@@ -35,12 +35,12 @@ public class TwitterApp1 {
         final DBCollection collection = database.getCollection("new_collection");//creating a collection
 
         DataStreamAndStore sas = new DataStreamAndStore();
-        //sas.streamAndStore("trump", collection);
+        //sas.streamAndStore("resist", collection);
 
         sas.analyzeData(collection);
 
-        //DatabaseConnection connection = new DatabaseConnection();
-        //connection.getAllUsers();
+        DatabaseConnection connection = new DatabaseConnection();
+        connection.getAllUsers();
 
 
 
