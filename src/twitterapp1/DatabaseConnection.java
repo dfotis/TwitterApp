@@ -1,3 +1,5 @@
+package twitterapp1;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.*;
@@ -8,46 +10,52 @@ import java.util.Arrays;
  * Created by manos on 9/1/2017.
  */
 public class DatabaseConnection {
-    String url = "jdbc:mysql://localhost:3306/javabase";
-    String username = "java";
-    String password = "password";
+    
+    
+    String url = "jdbc:mysql://localhost:3306/twitterbase";
+    String username = "user";
+    String password = "Passw0rd!123";
 
     double[][] hashtags_similarity;
     double[][] tweet_similarity;
     double[][] retweet_similarity;
     double[][] mentions_similarity;
     double[][] urls_similarity;
+    double[][] similarity;
 
     DatabaseConnection(){
-
+        
+        
     }
 
-    void insertRecord(DatabaseRecord record)  {
-
-
+    void insertRecord(DatabaseRecord record)  {     
+        
         System.out.println("Connecting database...");
-
-        try ( Connection connection = DriverManager.getConnection(url, username, password)) {
+        try(Connection connection = DriverManager.getConnection(url, username, password)) {
+            
             System.out.println("Database connected!");
-
-            record.insertUser("users",connection);
-            record.insertHashtags("hashtags",connection);
-            record.insertMentions("mentions",connection);
-            record.insertRetweet("retweet",connection);
-            record.insertTweet("tweet",connection);
-            record.insertUrls("urls",connection);
-
+            
+            record.insertUser("users", connection);
+            record.insertHashtags("hashtags", connection);
+            record.insertMentions("mentions", connection);
+            record.insertRetweet("retweet", connection);
+            record.insertTweet("tweet", connection);
+            record.insertUrls("urls", connection);
 
         } catch (SQLException e) {
+            System.out.println("->>"+record.user_id);
             throw new IllegalStateException("Cannot connect the database!", e);
         }
+            
     }
 
-     public String getAllUsers(){
+     public double[][] getAllUsers(){
 
         System.out.println("Connecting database...");
         ArrayList<String> users_ids = new ArrayList<>();
         ArrayList<String> all_hashtags = new ArrayList<>();
+        ArrayList<String> allUsernames = new ArrayList<>(); // ------------------------------ ADD THIS Allafi ------------------------------------
+
         try ( Connection connection = DriverManager.getConnection(url, username, password)) {
             System.out.println("Database connected!");
 
@@ -56,6 +64,8 @@ public class DatabaseConnection {
             ResultSet rs_selected_users = st.executeQuery(select_users);
             while (rs_selected_users.next()) {
                 users_ids.add(rs_selected_users.getString("user_id"));
+                allUsernames.add(rs_selected_users.getString("user_name")); // ------------------------------ ADD THIS Allafi ------------------------------------
+                
                 //System.out.println("User_id: " + rs.getString("user_id"));
             }
            // System.out.println("Size of users_id" + users_ids.size());
@@ -64,6 +74,7 @@ public class DatabaseConnection {
             retweet_similarity = new double[users_ids.size()][users_ids.size()];
             urls_similarity = new double[users_ids.size()][users_ids.size()];
             mentions_similarity = new double[users_ids.size()][users_ids.size()];
+            similarity = new double[users_ids.size()][users_ids.size()];
             for (int i = 0; i < users_ids.size(); i++) {
 
                 String current_hashtags = getCurrentsUserHashtags(users_ids.get(i),connection);
@@ -77,37 +88,48 @@ public class DatabaseConnection {
                 retweet_similarity[i][i] = 1;
                 urls_similarity[i][i] = 1;
                 mentions_similarity[i][i] = 1;
-                tweet_similarity[i][i] = 1;
+                similarity[i][i] = 1;
+              //  tweet_similarity[i][i] = 1;
                 for (int j = i+1; j < users_ids.size(); j++) {
 
                     String current_hashtags_2 = getCurrentsUserHashtags(users_ids.get(j),connection);
                     String current_mentions_2 = getCurrentsUserMentions(users_ids.get(j),connection);
                     String current_urls_2 = getCurrentsUserUrls(users_ids.get(j),connection);
-                    String current_tweet_2 = getCurrentsUserTweet(users_ids.get(j),connection);
+                   // String current_tweet_2 = getCurrentsUserTweet(users_ids.get(j),connection);
                     String current_retweet_2 = getCurrentsUserRetweet(users_ids.get(j),connection);
 
                     hashtags_similarity[i][j] = hashtags_similarity[j][i] = Similarity.cosineSimilarity(current_hashtags, current_hashtags_2);
                     retweet_similarity[i][j] = retweet_similarity[j][i] = Similarity.cosineSimilarity(current_retweet, current_retweet_2);
                     urls_similarity[i][j] = urls_similarity[j][i] = Similarity.cosineSimilarity(current_urls, current_urls_2);
                     mentions_similarity[i][j] = mentions_similarity[j][i] = Similarity.cosineSimilarity(current_mentions, current_mentions_2);
-                    tweet_similarity[i][j] = tweet_similarity[j][i] = Similarity.cosineSimilarity(current_tweet, current_tweet_2);
-
-
+                    // tweet_similarity[i][j] = tweet_similarity[j][i] = Similarity.cosineSimilarity(current_tweet, current_tweet_2);
+                    similarity[i][j] = similarity[j][i] = (hashtags_similarity[i][j]+retweet_similarity[i][j]+urls_similarity[i][j]+mentions_similarity[i][j]) / 4.0;
+                    //if(Double.isNaN(similarity[i][j])) System.out.println("->> "+current_urls_2+" ----- "+current_urls);
+                    
                 }
-                System.out.println("|");
+                //System.out.println("|");
 
 
 
             }
 
             printArray();
+            //Create the CSV file for Gephi for each array
+            // ------------------------------ ADD THIS Allafi ------------------------------------
+            GephiCsvCreator.writeArrayToCsv(allUsernames,hashtags_similarity,"HashtagsSimilarity.csv");
+            GephiCsvCreator.writeArrayToCsv(allUsernames,tweet_similarity,"TweetSimilarity.csv");
+            GephiCsvCreator.writeArrayToCsv(allUsernames,retweet_similarity,"RetweetSimilarity.csv");
+            GephiCsvCreator.writeArrayToCsv(allUsernames,urls_similarity,"UrlSimilarity.csv");
+            GephiCsvCreator.writeArrayToCsv(allUsernames,mentions_similarity,"MentionsSimilarity.csv");
+
+            //These files are used for the Gephi program as "Edge CSV file"
 
 
 
         } catch (SQLException e) {
             throw new IllegalStateException("Cannot connect the database!", e);
         }
-        return "";
+        return similarity;
 
     }
 
@@ -195,7 +217,7 @@ public class DatabaseConnection {
     }
 
     void printArray(){
-        for(int i= 0; i < hashtags_similarity.length; i++) {
+       /* for(int i= 0; i < hashtags_similarity.length; i++) {
             for (int j = 0; j < hashtags_similarity[i].length; j++) {
                 System.out.printf("%.2f ", hashtags_similarity[i][j]);
             }
@@ -226,6 +248,13 @@ public class DatabaseConnection {
         for(int i= 0; i < urls_similarity.length; i++) {
             for (int j = 0; j < urls_similarity[i].length; j++) {
                 System.out.printf("%.2f ", urls_similarity[i][j]);
+            }
+            System.out.println("|");
+        }*/
+       System.out.println("===============================");
+        for(int i= 0; i < similarity.length; i++) {
+            for (int j = 0; j < similarity[i].length; j++) {
+                System.out.printf("%.2f ", similarity[i][j]);
             }
             System.out.println("|");
         }

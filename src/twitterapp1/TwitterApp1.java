@@ -39,11 +39,12 @@ public class TwitterApp1 {
         DataStreamAndStore sas = new DataStreamAndStore();
         //sas.streamAndStore("resist", collection);
 
-       // sas.analyzeData(collection);
+        sas.analyzeData(collection);
 
         DatabaseConnection connection = new DatabaseConnection();
         connection.getAllUsers();
-
+        
+       
 
 
     }

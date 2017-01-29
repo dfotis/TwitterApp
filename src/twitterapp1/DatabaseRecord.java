@@ -1,3 +1,5 @@
+
+package twitterapp1;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -105,15 +107,14 @@ public class DatabaseRecord {
 
     void insertUrls(String table, Connection con) throws SQLException {
         String query = "INSERT INTO " + table + "(user_id, timestamp, url, extended_url) VALUES(?,?,?,?)";
-        for (int i = 0; i < url_list.size(); i++){
+          for (int i = 0; i < url_list.size(); i++){
             PreparedStatement preparedStat = con.prepareStatement(query);
             preparedStat.setString(1,user_id);
             preparedStat.setTimestamp(2, Timestamp.valueOf(timestampConverter()));
             preparedStat.setString(3,url_list.get(i));
             preparedStat.setString(4,expanded_url_list.get(i));
             preparedStat.execute();
-
-        }
+          }        
     }
 
     void insertRetweet(String table, Connection con) throws SQLException {

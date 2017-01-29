@@ -119,7 +119,7 @@ public class DataStreamAndStore {
                     e.printStackTrace();
                 }
             }
-        }, 3, TimeUnit.MINUTES);
+        }, 20, TimeUnit.HOURS);
 
     }
 
@@ -131,12 +131,12 @@ public class DataStreamAndStore {
         DatabaseConnection connection = new DatabaseConnection();
         DatabaseRecord record = null;
         while(cursor.hasNext()) {
-            System.out.println("================================");
+           // System.out.println("================================");
             DBObject next_object = cursor.next();
             record = new DatabaseRecord();
 
             record.setText((String)next_object.get("text"),(String)next_object.get("id_str"));
-            System.out.println((String)next_object.get("text"));
+           // System.out.println((String)next_object.get("text"));
 
             DBObject user_object = (DBObject)next_object.get("user");
             //System.out.println("user_object.get(\"id\")" + (String) user_object.get("id_str"));
@@ -218,12 +218,12 @@ public class DataStreamAndStore {
             }
             DBObject retweet_object = (DBObject)next_object.get("retweeted_status");
             if ( retweet_object != null){
-                System.out.println("Retweeted" );
+                //System.out.println("Retweeted" );
                 record.setRetwitte((String)retweet_object.get("id_str"));
             }
 
             connection.insertRecord(record);
-            System.out.println("================================");
+           // System.out.println("================================");
         }
 
     }
