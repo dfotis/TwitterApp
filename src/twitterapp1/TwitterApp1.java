@@ -34,15 +34,19 @@ public class TwitterApp1 {
         }
 
 
-        final DBCollection collection = database.getCollection("collection_resit");//creating a collection
+        final DBCollection collection = database.getCollection("collection_resit8");//creating a collection
 
         DataStreamAndStore sas = new DataStreamAndStore();
         //sas.streamAndStore("resist", collection);
 
-        sas.analyzeData(collection);
+        //sas.analyzeData(collection);
+        System.out.println("-->Analyze finished!");
 
         DatabaseConnection connection = new DatabaseConnection();
         connection.getAllUsers();
+        
+        System.out.println("Csv files created!!");
+        
         
        
 

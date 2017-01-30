@@ -11,7 +11,7 @@ import java.util.Arrays;
  */
 public class DatabaseConnection {
     
-    
+    Connection connection;
     String url = "jdbc:mysql://localhost:3306/twitterbase";
     String username = "user";
     String password = "Passw0rd!123";
@@ -44,19 +44,21 @@ public class DatabaseConnection {
 
         } catch (SQLException e) {
             System.out.println("->>"+record.user_id);
-            throw new IllegalStateException("Cannot connect the database!", e);
+            return;
+            //throw new IllegalStateException("Cannot connect the database!", e);
         }
             
     }
 
-     public double[][] getAllUsers(){
+     public ArrayList<String> getAllUsers(){
 
         System.out.println("Connecting database...");
         ArrayList<String> users_ids = new ArrayList<>();
         ArrayList<String> all_hashtags = new ArrayList<>();
         ArrayList<String> allUsernames = new ArrayList<>(); // ------------------------------ ADD THIS Allafi ------------------------------------
 
-        try ( Connection connection = DriverManager.getConnection(url, username, password)) {
+        try  {
+            connection = DriverManager.getConnection(url, username, password);
             System.out.println("Database connected!");
 
             Statement st = connection.createStatement();
@@ -64,7 +66,7 @@ public class DatabaseConnection {
             ResultSet rs_selected_users = st.executeQuery(select_users);
             while (rs_selected_users.next()) {
                 users_ids.add(rs_selected_users.getString("user_id"));
-                allUsernames.add(rs_selected_users.getString("user_name")); // ------------------------------ ADD THIS Allafi ------------------------------------
+                //allUsernames.add(rs_selected_users.getString("user_name")); // ------------------------------ ADD THIS Allafi ------------------------------------
                 
                 //System.out.println("User_id: " + rs.getString("user_id"));
             }
@@ -75,8 +77,9 @@ public class DatabaseConnection {
             urls_similarity = new double[users_ids.size()][users_ids.size()];
             mentions_similarity = new double[users_ids.size()][users_ids.size()];
             similarity = new double[users_ids.size()][users_ids.size()];
+            System.out.println("Printing");
             for (int i = 0; i < users_ids.size(); i++) {
-
+ System.out.println("Printing");
                 String current_hashtags = getCurrentsUserHashtags(users_ids.get(i),connection);
                 String current_mentions = getCurrentsUserMentions(users_ids.get(i),connection);
                 String current_urls = getCurrentsUserUrls(users_ids.get(i),connection);
@@ -91,7 +94,7 @@ public class DatabaseConnection {
                 similarity[i][i] = 1;
               //  tweet_similarity[i][i] = 1;
                 for (int j = i+1; j < users_ids.size(); j++) {
-
+                    System.out.println(j);
                     String current_hashtags_2 = getCurrentsUserHashtags(users_ids.get(j),connection);
                     String current_mentions_2 = getCurrentsUserMentions(users_ids.get(j),connection);
                     String current_urls_2 = getCurrentsUserUrls(users_ids.get(j),connection);
@@ -112,16 +115,16 @@ public class DatabaseConnection {
 
 
             }
-
+            
             printArray();
             //Create the CSV file for Gephi for each array
             // ------------------------------ ADD THIS Allafi ------------------------------------
-            GephiCsvCreator.writeArrayToCsv(allUsernames,hashtags_similarity,"HashtagsSimilarity.csv");
-            GephiCsvCreator.writeArrayToCsv(allUsernames,tweet_similarity,"TweetSimilarity.csv");
-            GephiCsvCreator.writeArrayToCsv(allUsernames,retweet_similarity,"RetweetSimilarity.csv");
-            GephiCsvCreator.writeArrayToCsv(allUsernames,urls_similarity,"UrlSimilarity.csv");
-            GephiCsvCreator.writeArrayToCsv(allUsernames,mentions_similarity,"MentionsSimilarity.csv");
-
+            GephiCsvCreator.writeArrayToCsv(users_ids,hashtags_similarity,"HashtagsSimilarity.csv");
+            GephiCsvCreator.writeArrayToCsv(users_ids,tweet_similarity,"TweetSimilarity.csv");
+            GephiCsvCreator.writeArrayToCsv(users_ids,retweet_similarity,"RetweetSimilarity.csv");
+            GephiCsvCreator.writeArrayToCsv(users_ids,urls_similarity,"UrlSimilarity.csv");
+            GephiCsvCreator.writeArrayToCsv(users_ids,mentions_similarity,"MentionsSimilarity.csv");
+            GephiCsvCreator.writeArrayToCsv(users_ids,similarity,"Similarity.csv");
             //These files are used for the Gephi program as "Edge CSV file"
 
 
@@ -129,7 +132,7 @@ public class DatabaseConnection {
         } catch (SQLException e) {
             throw new IllegalStateException("Cannot connect the database!", e);
         }
-        return similarity;
+        return allUsernames;
 
     }
 

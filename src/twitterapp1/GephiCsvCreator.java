@@ -28,7 +28,8 @@ public class GephiCsvCreator {
     public static boolean writeArrayToCsv(List<String> nodesNames, double[][] values, String filename){
 
         try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
+            FileWriter f = new FileWriter(filename);            
+            BufferedWriter writer = new BufferedWriter(f);
             StringBuilder builder = new StringBuilder();
             builder.append("Source").append(",").append("Target").append(",").append("Weight");
             builder.append("\n");
@@ -39,7 +40,8 @@ public class GephiCsvCreator {
                 }
             }
             writer.write(builder.toString());
-            writer.close();
+            f.close();
+//            writer.close();
             return true;
 
         } catch (IOException e) {
