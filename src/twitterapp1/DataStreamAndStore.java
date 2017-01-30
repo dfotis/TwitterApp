@@ -119,7 +119,7 @@ public class DataStreamAndStore {
                     e.printStackTrace();
                 }
             }
-        }, 20, TimeUnit.HOURS);
+        }, 20, TimeUnit.MINUTES);
 
     }
 
